@@ -1,21 +1,171 @@
 ---
-import PlotFigure from "../components/PlotFigure.astro";
 import Layout from "../layouts/Layout.astro";
-import * as Plot from "@observablehq/plot";
 import penguins from "../assets/penguins.json";
+import PlotFigure from "../components/PlotFigure.astro";
+import * as Plot from "@observablehq/plot";
+
+// Récupérer automatiquement la liste des espèces
+const species = [...new Set(penguins.map((p) => p.species))].sort();
+
+// Créer un graphique pour chaque espèce
+const plotConfigs = species.map((sp) => {
+  const filteredPenguins = penguins.filter((p) => p.species === sp);
+  
+  return {
+    species: sp,
+    options: {
+      grid: true,
+      marks: [
+        Plot.dot(filteredPenguins, {
+          x: "flipper_length_mm",
+          y: "body_mass_g",
+          fill: "steelblue",
+          r: 4,
+          fillOpacity: 0.7,
+        }),
+      ],
+      x: {
+        label: "Longueur des nageoires (mm)",
+      },
+      y: {
+        label: "Masse corporelle (g)",
+      },
+      title: `${sp} - Masse vs Longueur des nageoires`,
+    },
+  };
+});
 ---
 
 <Layout>
-  <h1 class="text-2xl">Test Astro et Plot (Observablehq)</h1>
-  <PlotFigure
-    options={{
-      marks: [
-        Plot.dot(penguins, {
-          x: "culmen_length_mm",
-          y: "culmen_depth_mm",
-          stroke: "species",
-        }),
-      ],
-    }}
-  />
+  <nav>
+    <ul>
+      <li><a href="/">Tous les graphiques</a></li>
+      <li><a href="/rendu-dynamique">Rendu dynamique</a></li>
+      <li><a href="/rendu-statique">Rendu statique</a></li>
+    </ul>
+  </nav>
+
+  <h1>Analyse des Pingouins - Tous les graphiques</h1>
+
+  <div class="tabs">
+    {species.map((sp, index) => (
+      <button 
+        class={`tab-button ${index === 0 ? 'active' : ''}`}
+        data-tab={sp}
+      >
+        {sp}
+      </button>
+    ))}
+  </div>
+
+  {plotConfigs.map((config, index) => {
+    const filtered = penguins.filter((p) => p.species === config.species);
+    return (
+      <div class={`tab-content ${index === 0 ? 'active' : ''}`} data-content={config.species}>
+        <div class="species-info">
+          <strong>{config.species}</strong> - {filtered.length} pingouins
+        </div>
+        <PlotFigure options={config.options} />
+      </div>
+    );
+  })}
+
+  <script>
+    // Gestion des onglets
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const targetTab = button.getAttribute('data-tab');
+        
+        // Désactiver tous les boutons et contenus
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+        
+        // Activer le bouton et le contenu sélectionnés
+        button.classList.add('active');
+        document.querySelector(`[data-content="${targetTab}"]`).classList.add('active');
+      });
+    });
+  </script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+    nav {
+      background-color: #2c3e50;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+    nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+    nav a:hover {
+      background-color: #34495e;
+    }
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .tab-button {
+      padding: 10px 20px;
+      border: none;
+      background-color: #e0e0e0;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    .tab-button.active {
+      background-color: #3498db;
+      color: white;
+    }
+    .tab-button:hover {
+      background-color: #d0d0d0;
+    }
+    .tab-button.active:hover {
+      background-color: #2980b9;
+    }
+    .tab-content {
+      display: none;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .species-info {
+      background-color: #e8f4f8;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+    }
+  </style>
+</body>
 </Layout>

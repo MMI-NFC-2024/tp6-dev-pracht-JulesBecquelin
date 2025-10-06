@@ -1,0 +1,127 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import penguins from "../../assets/penguins.json";
+import PlotFigure from "../../components/PlotFigure.astro";
+import * as Plot from "@observablehq/plot";
+
+// Générer les routes statiques
+export async function getStaticPaths() {
+  const species = [...new Set(penguins.map((p) => p.species))];
+  
+  return species.map((sp) => ({
+    params: { species: sp },
+  }));
+}
+
+const { species } = Astro.params;
+
+// Filtrer les pingouins pour l'espèce spécifiée
+const filteredPenguins = penguins.filter((p) => p.species === species);
+
+// Configuration du graphique
+const plotOptions = {
+  grid: true,
+  marks: [
+    Plot.dot(filteredPenguins, {
+      x: "flipper_length_mm",
+      y: "body_mass_g",
+      fill: "#27ae60",
+      r: 5,
+      fillOpacity: 0.7,
+    }),
+  ],
+  x: {
+    label: "Longueur des nageoires (mm)",
+  },
+  y: {
+    label: "Masse corporelle (g)",
+  },
+  title: `${species} - Relation Masse vs Longueur des nageoires`,
+};
+---
+
+<Layout>
+<body>
+  <nav>
+    <ul>
+      <li><a href="/">Tous les graphiques</a></li>
+      <li><a href="/rendu-dynamique">Rendu dynamique</a></li>
+      <li><a href="/rendu-statique">Rendu statique</a></li>
+    </ul>
+  </nav>
+
+  <h1>Pingouins de l'espèce {species}</h1>
+  
+  <div class="info-box">
+    <p><strong>{filteredPenguins.length}</strong> pingouin(s) trouvé(s) pour l'espèce <strong>{species}</strong></p>
+    <p><em>Mode : Rendu statique (pré-généré avec getStaticPaths)</em></p>
+  </div>
+
+  <div class="chart-container">
+    <PlotFigure options={plotOptions} />
+  </div>
+
+  <a href="/rendu-statique" class="back-link">← Retour à la liste</a>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+    nav {
+      background-color: #2c3e50;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+    nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+    nav a:hover {
+      background-color: #34495e;
+    }
+    .info-box {
+      background-color: #d5f4e6;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .chart-container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #95a5a6;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+    .back-link:hover {
+      background-color: #7f8c8d;
+    }
+  </style>
+</body>
+</Layout>

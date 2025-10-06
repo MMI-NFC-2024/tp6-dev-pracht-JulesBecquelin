@@ -1,0 +1,95 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import penguins from "../../assets/penguins.json";
+
+// Déterminer automatiquement la liste des espèces
+const species = [...new Set(penguins.map((p) => p.species))].sort();
+---
+
+<Layout>
+  <body>
+  <nav>
+    <ul>
+      <li><a href="/">Tous les graphiques</a></li>
+      <li><a href="/rendu-dynamique">Rendu dynamique</a></li>
+      <li><a href="/rendu-statique">Rendu statique</a></li>
+    </ul>
+  </nav>
+
+  <h1>Liste des Espèces - Rendu Dynamique</h1>
+  
+  <div class="species-list">
+    <ul>
+      {species.map((sp) => (
+        <li>
+          <a href={`/rendu-dynamique/${sp}`}>
+            Espèce : {sp}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</body>
+<style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+    nav {
+      background-color: #2c3e50;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+    nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+    nav a:hover {
+      background-color: #34495e;
+    }
+    .species-list {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .species-list ul {
+      list-style: none;
+      padding: 0;
+    }
+    .species-list li {
+      margin: 10px 0;
+    }
+    .species-list a {
+      display: block;
+      padding: 15px;
+      background-color: #3498db;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+    .species-list a:hover {
+      background-color: #2980b9;
+    }
+  </style>
+</Layout>
